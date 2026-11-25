@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#173B63">
+<title>Mon Budget</title>
+<style>
+:root{--dark:#173B63;--green:#2F6FAE;--mint:#E8F1FA;--bg:#f3f5f3;--ink:#1d2925;--muted:#6d7b75;--line:#dfe6e1;--red:#bd3434;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:var(--dark);color:white;padding:22px 18px 18px;position:sticky;top:0;z-index:5}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{font-size:23px;margin:0;font-weight:750;letter-spacing:.2px}
+.sub{color:#c7d9d1;font-size:12px;margin-top:5px}
+main{max-width:950px;margin:auto;padding:16px 14px 100px}
+.total-card{background:var(--dark);color:white;border-radius:18px;padding:19px;margin:2px 0 18px;box-shadow:0 5px 16px #173B6318}
+.eyebrow{font-size:12px;color:#c7d9d1}
+.big-total{font-size:30px;font-weight:750;margin-top:6px;font-variant-numeric:tabular-nums}
+.section-title{font-size:17px;font-weight:750;margin:20px 2px 11px}
+.card{background:white;border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:11px;box-shadow:0 2px 8px #1b33240a}
+.account{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.account-name{font-weight:700;font-size:16px}
+.account-card{position:relative}.account-head{display:flex;align-items:center;gap:10px}.drag-handle{width:40px;min-width:40px;height:42px;padding:0;background:var(--mint);color:var(--dark);font-size:21px;touch-action:none;cursor:grab;border:1px dashed #9bb6cf}.drag-handle:active{cursor:grabbing}.account-card.dragging{opacity:.45;border:2px dashed var(--green)}.account-card.drop-target{outline:3px solid #8bb8df;outline-offset:2px}.reorder-hint{margin:-4px 2px 12px}
+.account-meta{font-size:12px;color:var(--muted);margin-top:4px}
+.amount{font-weight:750;font-size:17px;font-variant-numeric:tabular-nums;text-align:right}
+.negative{color:var(--red)!important}.muted{color:var(--muted)}.small{font-size:12px}
+button,.btn{border:0;border-radius:11px;padding:12px 14px;background:var(--green);color:white;font-weight:700;font-size:14px;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btn-secondary{background:var(--mint);color:var(--dark)}.btn-danger{background:#f9e9e8;color:var(--red)}
+.btn-plain{background:transparent;color:var(--dark);padding:8px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.primary{width:100%;padding:15px;font-size:15px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 5px calc(8px + env(safe-area-inset-bottom));z-index:6}
+nav button{background:transparent;color:var(--muted);font-size:11px;padding:8px 5px;flex:1}
+nav button.active{color:var(--green);background:var(--mint)}
+nav span{display:block;font-size:19px;margin-bottom:3px}
+input,select{width:100%;padding:12px;border:1px solid #cfd9d2;border-radius:10px;background:white;font:inherit;color:var(--ink);margin-top:5px}
+label{display:block;font-size:13px;font-weight:650;margin:12px 0 5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-actions{display:flex;gap:8px;margin-top:16px}.form-actions>*{flex:1}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.toolbar select{flex:1;min-width:140px;margin:0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:10px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-size:11px}
+td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.check{width:20px;height:20px;accent-color:var(--green)}
+.tablewrap{overflow-x:auto}.empty{text-align:center;padding:25px 10px;color:var(--muted);font-size:14px}
+.pill{display:inline-block;background:var(--mint);color:var(--dark);border-radius:30px;padding:4px 8px;font-size:11px;font-weight:700}
+.hidden{display:none!important}
+.modal{position:fixed;inset:0;background:#0007;z-index:10;display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.sheet{background:white;border-radius:20px 20px 14px 14px;padding:20px;width:100%;max-width:560px;max-height:90vh;overflow:auto}
+.sheet h2{margin:0 0 12px;font-size:19px}
+.close{float:right;background:var(--mint);color:var(--dark);padding:7px 11px}
+.notice{background:#fff8e6;border:1px solid #f0dfae;border-radius:12px;padding:12px;font-size:12px;color:#68521c;margin:12px 0}
+.selectionbar{background:var(--mint);border:1px solid #cbdced;border-radius:13px;padding:12px;margin:12px 0}
+footer{text-align:center;color:var(--muted);font-size:11px;margin-top:24px}
+@media(min-width:650px){.modal{align-items:center}.sheet{border-radius:18px}.account-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}.account-list .card{margin:0}}
+</style>
+</head>
+<body>
+<header><div class="headrow"><div><h1>Mon Budget</h1><div class="sub">Vos comptes, simplement</div></div><div style="font-size:25px">€</div></div></header>
+<main id="app"></main>
+<nav>
+<button data-page="home"><span>⌂</span>Accueil</button>
+<button data-page="operations"><span>⇄</span>Opérations</button>
+<button data-page="pointage"><span>✓</span>Pointage</button>
+<button data-page="backup"><span>▣</span>Sauvegarde</button>
+</nav>
+<div id="modal" class="modal hidden"><div class="sheet"><button class="close" onclick="closeModal()">✕</button><div id="modalContent"></div></div></div>
+<input type="file" id="importFile" accept=".json,application/json" class="hidden">
+<script>
+'use strict';
+const KEY='monBudgetData_v1';
+let data={accounts:[],transactions:[],accountOrder:[]},page='home',selectedAccount='all';
+let draggingAccountId=null;
+let selectedTransactions=new Set();
+const money=n=>Number(n||0).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const dateToday=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function load(){
+  try{const x=localStorage.getItem(KEY);if(x){const p=JSON.parse(x);if(Array.isArray(p.accounts)&&Array.isArray(p.transactions)){data={...p,accounts:p.accounts,transactions:p.transactions,accountOrder:Array.isArray(p.accountOrder)?p.accountOrder:[]};}}}
+  catch(e){console.error('Lecture des données impossible',e);}
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));}
+function orderedAccounts(){
+ const ids=Array.isArray(data.accountOrder)?data.accountOrder:[];
+ return [...data.accounts].sort((a,b)=>{const ai=ids.indexOf(a.id),bi=ids.indexOf(b.id);return (ai<0?Number.MAX_SAFE_INTEGER:ai)-(bi<0?Number.MAX_SAFE_INTEGER:bi);});
+}
+function persistAccountOrder(){data.accountOrder=orderedAccounts().map(a=>a.id);save();}
+function balance(id){
+  const a=data.accounts.find(x=>x.id===id);
+  return (Number(a?.opening)||0)+data.transactions.filter(t=>t.accountId===id).reduce((s,t)=>s+(t.type==='credit'?1:-1)*Number(t.amount),0);
+}
+function checkedBalance(id){
+  const a=data.accounts.find(x=>x.id===id);
+  return (Number(a?.opening)||0)+data.transactions.filter(t=>t.accountId===id&&t.checked).reduce((s,t)=>s+(t.type==='credit'?1:-1)*Number(t.amount),0);
+}
+function total(){return data.accounts.reduce((s,a)=>s+balance(a.id),0)}
+function fmtDate(d){if(!d)return '';const [y,m,day]=d.split('-');return `${day}/${m}/${y}`}
+function setPage(p){page=p;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));render()}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>setPage(b.dataset.page));
+function render(){
+ const root=document.getElementById('app');
+ if(page==='home')root.innerHTML=home();
+ if(page==='operations')root.innerHTML=operations();
+ if(page==='pointage')root.innerHTML=pointage();
+ if(page==='backup')root.innerHTML=backup();
+ bind();
+}
+function home(){
+ return `<div class="total-card"><div class="eyebrow">TOTAL DE TOUS VOS COMPTES</div><div class="big-total ${total()<0?'negative':''}">${money(total())}</div><div class="eyebrow" style="margin-top:6px">${data.accounts.length} compte(s)</div></div>
+ <div class="section-title">Mes comptes</div><div class="small muted reorder-hint">☰ Maintiens cette poignée et fais glisser le compte pour changer sa place.</div><div class="account-list">${data.accounts.length?orderedAccounts().map(a=>`<div class="card account-card" data-account-card="${esc(a.id)}"><div class="account-head"><button type="button" class="drag-handle" data-drag-account="${esc(a.id)}" aria-label="Déplacer ${esc(a.name)}" title="Maintenir et déplacer">☰</button><div class="account" style="flex:1"><div><div class="account-name">${esc(a.name)}</div><div class="account-meta">Solde initial : ${money(a.opening)}</div></div><div class="amount ${balance(a.id)<0?'negative':''}">${money(balance(a.id))}</div></div></div><div class="actions"><button class="btn-secondary" data-account="${esc(a.id)}">Voir le compte</button><button class="btn-secondary" data-edit-account="${esc(a.id)}">Modifier</button></div></div>`).join(''):`<div class="card empty">Aucun compte pour le moment.<br>Ajoutez votre premier compte.</div>`}</div>
+ <button class="primary" id="addAccount">＋ Ajouter un compte</button><footer>Mon Budget · données conservées sur cet appareil</footer>`;
+}
+function accountOptions(){return data.accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('')}
+function runningBalances(){
+ const balances=new Map();
+ data.accounts.forEach(a=>{
+  let current=Number(a.opening)||0;
+  const chronological=data.transactions
+   .filter(t=>t.accountId===a.id)
+   .sort((a,b)=>(a.date||'').localeCompare(b.date||'')||String(a.id).localeCompare(String(b.id)));
+  chronological.forEach(t=>{
+   current+=(t.type==='credit'?1:-1)*Number(t.amount||0);
+   balances.set(t.id,current);
+  });
+ });
+ return balances;
+}
+function operations(){
+ const rowBalances=runningBalances();
+ let list=data.transactions.filter(t=>selectedAccount==='all'||t.accountId===selectedAccount).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ const visibleIds=list.map(t=>t.id);
+ const selectedVisible=visibleIds.filter(id=>selectedTransactions.has(id)).length;
+ return `<div class="section-title">Mes opérations</div>
+ <div class="toolbar"><select id="filterAccount"><option value="all">Tous les comptes</option>${accountOptions()}</select><button id="addTransaction">＋ Ajouter</button></div>
+ <div class="selectionbar">
+  <div><b>${selectedVisible}</b> opération(s) sélectionnée(s)</div>
+  <div class="actions">
+   <button class="btn-secondary" id="selectAll">${selectedVisible===visibleIds.length&&visibleIds.length?'Tout désélectionner':'Tout sélectionner'}</button>
+   <button class="primary" id="duplicateNextMonth" ${selectedVisible?'':'disabled'}>Reproduire au mois suivant (même compte)</button>
+   <button id="copySelected" ${selectedVisible?'':'disabled'}>Copier vers un autre compte (mois suivant)</button>
+   <button class="btn-secondary" id="clearSelection" ${selectedVisible?'':'disabled'}>Effacer la sélection</button>
+  </div>
+  <div class="small muted" style="margin-top:8px">La copie avance chaque date d'un mois calendaire. Les opérations d'origine restent inchangées.</div>
+ </div>
+ ${list.length?`<div class="card tablewrap"><table><thead><tr><th>Sélect.</th><th>Date</th><th>Compte / Libellé</th><th>Débit</th><th>Crédit</th><th>Pointé</th><th>Solde</th><th></th></tr></thead><tbody>${list.map(t=>{let a=data.accounts.find(x=>x.id===t.accountId);return `<tr><td><input class="check" type="checkbox" data-select-transaction="${esc(t.id)}" ${selectedTransactions.has(t.id)?'checked':''} aria-label="Sélectionner ${esc(t.label)}"></td><td>${fmtDate(t.date)}</td><td><b>${esc(a?.name||'Compte supprimé')}</b><br>${esc(t.label)}</td><td class="num">${t.type==='debit'?money(t.amount):'—'}</td><td class="num">${t.type==='credit'?money(t.amount):'—'}</td><td>${t.checked?'✓':'—'}</td><td class="num ${(rowBalances.get(t.id)??0)<0?'negative':''}">${money(rowBalances.get(t.id)??0)}</td><td><button class="btn-secondary" data-edit="${esc(t.id)}">✎</button></td></tr>`}).join('')}</tbody></table></div>`:`<div class="card empty">Aucune opération à afficher.</div>`}`;
+}
+function pointage(){
+ let list=data.transactions.filter(t=>(selectedAccount==='all'||t.accountId===selectedAccount)&&!t.checked).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+ let ids=data.accounts.filter(a=>selectedAccount==='all'||a.id===selectedAccount);
+ return `<div class="section-title">Pointer les opérations</div><div class="toolbar"><select id="filterAccount"><option value="all">Tous les comptes</option>${accountOptions()}</select></div>${ids.map(a=>`<div class="card"><b>${esc(a.name)}</b><div class="small muted">Solde pointé : <strong class="${checkedBalance(a.id)<0?'negative':''}">${money(checkedBalance(a.id))}</strong> · Solde total : ${money(balance(a.id))}</div><label>Solde indiqué sur votre relevé (€)</label><input type="number" step="0.01" id="statement-${esc(a.id)}" placeholder="Saisir le solde du relevé"><div class="small muted" id="diff-${esc(a.id)}">Écart calculé après saisie</div></div>`).join('')}${list.length?`<div class="card"><b>Opérations à pointer</b><div class="tablewrap"><table><thead><tr><th>Date</th><th>Libellé</th><th>Montant</th><th>Pointer</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td>${fmtDate(t.date)}</td><td>${esc(t.label)}<br><span class="small muted">${esc(data.accounts.find(a=>a.id===t.accountId)?.name||'')}</span></td><td class="num ${t.type==='debit'?'negative':''}">${t.type==='debit'?'−':'+'}${money(t.amount)}</td><td><input class="check" type="checkbox" data-check="${esc(t.id)}"></td><td><button type="button" class="btn-secondary" data-edit="${esc(t.id)}" aria-label="Modifier ${esc(t.label)}">✎</button></td></tr>`).join('')}</tbody></table></div></div>`:`<div class="card empty">Toutes les opérations de cette sélection sont pointées.</div>`}<button class="primary" id="addMissing">＋ Ajouter une opération manquante</button>`;
+}
+function backup(){
+ return `<div class="section-title">Sauvegarder / Restaurer</div>
+ <div class="card"><b>Sauvegarder mes données</b><p class="small muted">Crée un fichier JSON contenant vos comptes et vos opérations. Enregistre-le dans Fichiers, par exemple dans iCloud Drive.</p><button class="primary" id="export">Sauvegarder</button></div>
+ <div class="card"><b>Restaurer une sauvegarde</b><p class="small muted">Choisis un fichier JSON créé par Mon Budget. Les données actuelles seront remplacées après confirmation.</p><button class="btn-secondary" id="import">Choisir un fichier de sauvegarde</button></div>
+ <div class="notice"><b>À savoir :</b> le fichier HTML conserve ses données dans le navigateur de chaque appareil. Le fichier JSON permet de transférer les données manuellement via Fichiers, mais la synchronisation entre iPhone, Mac et PC n'est pas automatique.</div>
+ <div class="card"><b>État de l'application</b><div class="small muted">${data.accounts.length} compte(s) · ${data.transactions.length} opération(s)</div><div class="actions"><button class="btn-danger" id="reset">Effacer toutes les données</button></div></div>`;
+}
+function finishAccountDrag(e){
+ if(!draggingAccountId)return;
+ const sourceId=draggingAccountId;
+ const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-account-card]');
+ document.querySelectorAll('.account-card').forEach(c=>c.classList.remove('dragging','drop-target'));
+ draggingAccountId=null;
+ if(!target||target.dataset.accountCard===sourceId)return;
+ const ids=orderedAccounts().map(a=>a.id);
+ const from=ids.indexOf(sourceId),targetIndex=ids.indexOf(target.dataset.accountCard);
+ if(from<0||targetIndex<0||from===targetIndex)return;
+ ids.splice(from,1);
+ const targetCard=target.getBoundingClientRect();
+ let insertAt=targetIndex+(e.clientY>targetCard.top+targetCard.height/2?1:0);
+ if(from<targetIndex)insertAt--;
+ insertAt=Math.max(0,Math.min(ids.length,insertAt));
+ ids.splice(insertAt,0,sourceId);
+ data.accountOrder=ids;save();render();
+}
+function bind(){
+ if(page==='home'){
+  document.querySelectorAll('[data-drag-account]').forEach(handle=>{
+   handle.onpointerdown=e=>{e.preventDefault();draggingAccountId=handle.dataset.dragAccount;handle.closest('[data-account-card]')?.classList.add('dragging');try{handle.setPointerCapture(e.pointerId)}catch(_){};};
+   handle.onpointermove=e=>{
+    if(!draggingAccountId)return;
+    const el=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-account-card]');
+    document.querySelectorAll('.account-card').forEach(c=>c.classList.toggle('drop-target',!!el&&c===el&&c.dataset.accountCard!==draggingAccountId));
+   };
+   handle.onpointerup=e=>finishAccountDrag(e);
+   handle.onpointercancel=e=>finishAccountDrag(e);
+  });
+ }
+ const f=document.getElementById('filterAccount');
+ if(f){f.value=selectedAccount;f.onchange=()=>{selectedAccount=f.value;render()};}
+ const addA=document.getElementById('addAccount');if(addA)addA.onclick=()=>accountForm();
+ const addT=document.getElementById('addTransaction');if(addT)addT.onclick=()=>transactionForm();
+ document.querySelectorAll('[data-account]').forEach(b=>b.onclick=()=>{selectedAccount=b.dataset.account;selectedTransactions.clear();setPage('operations')});
+ document.querySelectorAll('[data-edit-account]').forEach(b=>b.onclick=()=>accountForm(b.dataset.editAccount));
+ document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>transactionForm(b.dataset.edit));
+ document.querySelectorAll('[data-select-transaction]').forEach(b=>b.onchange=()=>{if(b.checked)selectedTransactions.add(b.dataset.selectTransaction);else selectedTransactions.delete(b.dataset.selectTransaction);render()});
+ const duplicate=document.getElementById('duplicateNextMonth');if(duplicate)duplicate.onclick=duplicateSelectedToNextMonth;
+ const sa=document.getElementById('selectAll');if(sa)sa.onclick=()=>{
+  const ids=data.transactions.filter(t=>selectedAccount==='all'||t.accountId===selectedAccount).map(t=>t.id);
+  const all=ids.length&&ids.every(id=>selectedTransactions.has(id));
+  ids.forEach(id=>all?selectedTransactions.delete(id):selectedTransactions.add(id));render();
+ };
+ const cs=document.getElementById('clearSelection');if(cs)cs.onclick=()=>{selectedTransactions.clear();render()};
+ const cp=document.getElementById('copySelected');if(cp)cp.onclick=()=>copySelectedForm();
+ document.querySelectorAll('[data-check]').forEach(b=>b.onchange=()=>{const t=data.transactions.find(x=>x.id===b.dataset.check);if(t){t.checked=b.checked;save();render()}});
+ const am=document.getElementById('addMissing');if(am)am.onclick=()=>transactionForm();
+ if(page==='pointage')data.accounts.filter(a=>selectedAccount==='all'||a.id===selectedAccount).forEach(a=>{
+  let el=document.getElementById('statement-'+a.id);
+  if(el)el.oninput=()=>{let d=Number(el.value)-checkedBalance(a.id);document.getElementById('diff-'+a.id).textContent=el.value===''?'Écart calculé après saisie':`Écart : ${money(d)}`};
+ });
+ const ex=document.getElementById('export');if(ex)ex.onclick=exportData;
+ const im=document.getElementById('import');if(im)im.onclick=()=>document.getElementById('importFile').click();
+ const rs=document.getElementById('reset');if(rs)rs.onclick=()=>{if(confirm('Effacer définitivement tous les comptes et toutes les opérations de cet appareil ?')){data={accounts:[],transactions:[],accountOrder:[]};selectedTransactions.clear();save();render()}};
+}
+function addOneMonth(date){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date||''))return date;
+ const [y,m,d]=date.split('-').map(Number);
+ const targetYear=y+(m===12?1:0),targetMonth=m===12?1:m+1;
+ const lastDay=new Date(targetYear,targetMonth,0).getDate();
+ return `${targetYear}-${String(targetMonth).padStart(2,'0')}-${String(Math.min(d,lastDay)).padStart(2,'0')}`;
+}
+function duplicateSelectedToNextMonth(){
+ const chosen=data.transactions.filter(t=>selectedTransactions.has(t.id));
+ if(!chosen.length){alert('Sélectionne au moins une opération.');return;}
+ const dated=chosen.filter(t=>/^\d{4}-\d{2}-\d{2}$/.test(t.date||''));
+ if(dated.length!==chosen.length){alert('Certaines opérations sélectionnées n’ont pas de date valide. Aucune opération n’a été reproduite.');return;}
+ const candidates=chosen.map(t=>({...t,id:crypto.randomUUID(),date:addOneMonth(t.date),checked:false}));
+ const isDuplicate=c=>data.transactions.some(t=>t.accountId===c.accountId&&t.date===c.date&&t.label===c.label&&t.type===c.type&&Number(t.amount)===Number(c.amount));
+ const fresh=candidates.filter(c=>!isDuplicate(c));const skipped=candidates.length-fresh.length;
+ if(!fresh.length){alert('Aucune nouvelle opération créée : toutes les opérations du mois suivant existent déjà.');return;}
+ const message=`Tu vas créer ${fresh.length} opération(s) au mois suivant sur le même compte.${skipped?`\n${skipped} doublon(s) seront ignoré(s).`:''}\n\nLes nouvelles opérations seront non pointées. Continuer ?`;
+ if(!confirm(message))return;
+ data.transactions.push(...fresh);save();selectedTransactions.clear();render();alert(`${fresh.length} opération(s) reproduite(s) sur le même compte${skipped?` ; ${skipped} doublon(s) ignoré(s)`:''}.`);
+}
+
+function copySelectedForm(){
+ const chosen=data.transactions.filter(t=>selectedTransactions.has(t.id));
+ if(!chosen.length){alert('Sélectionne au moins une opération.');return;}
+ const sourceAccounts=[...new Set(chosen.map(t=>t.accountId))];
+ const sourceLabel=sourceAccounts.length===1?(data.accounts.find(a=>a.id===sourceAccounts[0])?.name||'Compte source'):'plusieurs comptes';
+ const options=data.accounts.map(a=>`<option value="${esc(a.id)}" ${sourceAccounts.length===1&&a.id===sourceAccounts[0]?'disabled':''}>${esc(a.name)}</option>`).join('');
+ openModal(`<h2>Copier les opérations</h2>
+ <p class="small muted">${chosen.length} opération(s) sélectionnée(s) depuis ${esc(sourceLabel)}.</p>
+ <label>Compte de destination</label><select id="copyDestination" required><option value="">Choisir un compte…</option>${options}</select>
+ <div class="notice">Chaque date sera avancée d'un mois calendaire. Exemple : 01/12/2026 devient 01/01/2027. Les montants et libellés seront conservés. Les copies seront non pointées et les opérations d'origine resteront intactes.</div>
+ <div class="form-actions"><button type="button" class="btn-secondary" onclick="closeModal()">Annuler</button><button type="button" id="confirmCopy">Continuer</button></div>`);
+ document.getElementById('confirmCopy').onclick=()=>{
+  const dest=document.getElementById('copyDestination').value;
+  if(!dest){alert('Choisis un compte de destination.');return;}
+  const destination=data.accounts.find(a=>a.id===dest);
+  if(!destination)return;
+  const preview=chosen.slice(0,4).map(t=>`${t.label} : ${fmtDate(t.date)} → ${fmtDate(addOneMonth(t.date))}`).join('\n');
+  const more=chosen.length>4?`\n… et ${chosen.length-4} autre(s) opération(s).`:'';
+  if(!confirm(`Copier ${chosen.length} opération(s) vers « ${destination.name} » ?\n\n${preview}${more}\n\nLes opérations d'origine ne seront pas modifiées.`))return;
+  let created=0,skipped=0;
+  chosen.forEach(t=>{
+   const newDate=addOneMonth(t.date);
+   const duplicate=data.transactions.some(x=>x.accountId===dest&&x.date===newDate&&x.label===t.label&&x.type===t.type&&Number(x.amount)===Number(t.amount));
+   if(duplicate){skipped++;return;}
+   data.transactions.push({id:crypto.randomUUID(),accountId:dest,date:newDate,label:t.label,type:t.type,amount:Number(t.amount),checked:false});
+   created++;
+  });
+  save();selectedTransactions.clear();closeModal();render();
+  alert(`${created} opération(s) copiée(s) vers « ${destination.name} ». ${skipped?skipped+' doublon(s) ignoré(s).':''}`);
+ };
+}
+function openModal(content){document.getElementById('modalContent').innerHTML=content;document.getElementById('modal').classList.remove('hidden')}
+function closeModal(){document.getElementById('modal').classList.add('hidden')}
+function accountForm(id){
+ let a=data.accounts.find(x=>x.id===id);
+ openModal(`<h2>${a?'Modifier le compte':'Ajouter un compte'}</h2><form id="accountForm"><label>Nom du compte</label><input name="name" required maxlength="45" placeholder="Ex. Compte courant 2026" value="${esc(a?.name||'')}"><label>Solde initial / report (€)</label><input name="opening" type="number" step="0.01" value="${a?.opening??0}" required><div class="form-actions"><button type="button" class="btn-secondary" onclick="closeModal()">Annuler</button><button>Enregistrer</button></div>${a?`<div class="actions"><button type="button" class="btn-danger" id="deleteAccount">Supprimer ce compte</button></div>`:''}</form>`);
+ document.getElementById('accountForm').onsubmit=e=>{
+  e.preventDefault();let fd=new FormData(e.target);
+  if(a){a.name=fd.get('name').trim();a.opening=Number(fd.get('opening'));}
+  else data.accounts.push({id:crypto.randomUUID(),name:fd.get('name').trim(),opening:Number(fd.get('opening'))});
+  save();closeModal();render();
+ };
+ const del=document.getElementById('deleteAccount');
+ if(del)del.onclick=()=>{
+  const count=data.transactions.filter(t=>t.accountId===a.id).length;
+  const message=count
+   ? `Supprimer définitivement le compte « ${a.name} » et ses ${count} opération(s) ?\\n\\nCette action est irréversible. Les autres comptes et leurs opérations ne seront pas modifiés.`
+   : `Supprimer définitivement le compte « ${a.name} » ?\\n\\nCette action est irréversible.`;
+  if(confirm(message)){
+   data.transactions=data.transactions.filter(t=>t.accountId!==a.id);
+   data.accounts=data.accounts.filter(x=>x.id!==a.id);
+   data.accountOrder=(data.accountOrder||[]).filter(x=>x!==a.id);
+   selectedTransactions.clear();
+   if(selectedAccount===a.id)selectedAccount='all';
+   save();closeModal();render();
+  }
+ };
+}
+function transactionForm(id){
+ if(!data.accounts.length){alert('Ajoute d’abord un compte.');return;}
+ let t=data.transactions.find(x=>x.id===id);
+ openModal(`<h2>${t?'Modifier l’opération':'Nouvelle opération'}</h2><form id="transactionForm"><label>Compte</label><select name="accountId" required>${accountOptions()}</select><label>Date</label><input type="date" name="date" value="${t?.date||dateToday()}" required><label>Libellé</label><input name="label" required maxlength="80" placeholder="Ex. Courses, salaire…" value="${esc(t?.label||'')}"><div class="grid2"><div><label>Type</label><select name="type"><option value="debit">Débit</option><option value="credit">Crédit</option></select></div><div><label>Montant (€)</label><input name="amount" type="number" min="0.01" step="0.01" required value="${t?.amount??''}"></div></div><label><input style="width:auto;margin-right:7px" type="checkbox" name="checked" ${t?.checked?'checked':''}> Opération déjà pointée</label><div class="form-actions"><button type="button" class="btn-secondary" onclick="closeModal()">Annuler</button><button>Enregistrer</button></div>${t?`<div class="actions"><button type="button" class="btn-danger" id="deleteTransaction">Supprimer l’opération</button></div>`:''}</form>`);
+ const form=document.getElementById('transactionForm');
+ form.elements.accountId.value=t?.accountId||(selectedAccount!=='all'&&selectedAccount)||data.accounts[0].id;
+ form.elements.type.value=t?.type||'debit';
+ form.onsubmit=e=>{
+  e.preventDefault();let fd=new FormData(form);
+  let item={id:t?.id||crypto.randomUUID(),accountId:fd.get('accountId'),date:fd.get('date'),label:fd.get('label').trim(),type:fd.get('type'),amount:Number(fd.get('amount')),checked:form.elements.checked.checked};
+  if(t)Object.assign(t,item);else data.transactions.push(item);
+  save();closeModal();render();
+ };
+ const del=document.getElementById('deleteTransaction');
+ if(del)del.onclick=()=>{if(confirm('Supprimer cette opération ?')){data.transactions=data.transactions.filter(x=>x.id!==t.id);save();closeModal();render();}};
+}
+/* Sauvegarde : nom fixe. iOS affiche la feuille de partage. */
+async function exportData(){
+ const contenu=JSON.stringify({app:'Mon Budget',version:1,exportedAt:new Date().toISOString(),...data},null,2);
+ const nom='MonBudget-sauvegarde.json';
+ try{
+  const fichier=new File([contenu],nom,{type:'application/json'});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[fichier]})){await navigator.share({files:[fichier]});return;}
+ }catch(e){if(e&&e.name==='AbortError')return;console.warn('Partage de fichier indisponible, téléchargement classique utilisé.',e);}
+ const blob=new Blob([contenu],{type:'application/json'}),url=URL.createObjectURL(blob),lien=document.createElement('a');
+ lien.href=url;lien.download=nom;document.body.appendChild(lien);lien.click();lien.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+}
+document.getElementById('importFile').onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  const p=JSON.parse(await file.text());
+  if(!Array.isArray(p.accounts)||!Array.isArray(p.transactions))throw new Error('Format invalide');
+  if(confirm('Remplacer les données actuelles par celles de cette sauvegarde ?')){
+   data={accounts:p.accounts,transactions:p.transactions,accountOrder:Array.isArray(p.accountOrder)?p.accountOrder:[]};selectedTransactions.clear();save();selectedAccount='all';render();alert('Sauvegarde restaurée.');
+  }
+ }catch(err){alert('Ce fichier ne semble pas être une sauvegarde Mon Budget valide.');}
+ e.target.value='';
+};
+load();render();
+</script>
+</body>
+</html>
